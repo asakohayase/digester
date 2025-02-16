@@ -1,11 +1,11 @@
-const Url = require('../models/Url');
-const axios = require('axios');
+import { Url } from '../models/Url';
+import axios from 'axios';
 
 const isValidUrl = (string) => {
     try {
-        new URL(string);
-        return true;
-    } catch (err) {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
         return false;
     }
 };
@@ -70,4 +70,4 @@ const handleMessage = async (message) => {
     }
 };
 
-module.exports = { handleMessage }; 
+export { handleMessage };

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const urlSchema = new mongoose.Schema({
     url: {
@@ -20,4 +20,4 @@ const urlSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Url', urlSchema); 
+export default mongoose.model('Url', urlSchema);

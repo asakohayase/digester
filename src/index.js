@@ -1,8 +1,12 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-require('dotenv').config();
-const { handleMessage } = require('./handlers/messageHandler');
+/* eslint-disable */
+
+import express from 'express';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import { config } from 'dotenv';
+import { handleMessage } from './handlers/messageHandler';
+
+config();
 
 const app = express();
 const port = process.env.PORT || 4000;
