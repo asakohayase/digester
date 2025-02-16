@@ -11,6 +11,7 @@
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-toast": "^1.2.6",
     "@stytch/nextjs": "^21.4.0",
     "@stytch/vanilla-js": "^5.17.0",
     "@supabase/supabase-js": "^2.48.1",

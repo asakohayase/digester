@@ -2,8 +2,9 @@
 
 import { useStytch, useStytchUser } from "@stytch/nextjs"
 import { useRouter } from "next/navigation"
-import { Zap } from "lucide-react"
+import { Settings, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function Navbar() {
   const { user, isInitialized } = useStytchUser()
@@ -32,12 +33,19 @@ export function Navbar() {
             <div className="bg-primary rounded-full p-2">
               <Zap className="w-5 h-5 text-background" />
             </div>
-            <span className="font-serif text-xl">Briefing</span>
+            <Link className="font-serif text-xl" href="/">Briefing</Link>
           </div>
           <div className="flex items-center gap-6">
             <button className="text-primary hover:text-opacity-80 font-medium">
               Archives
             </button>
+            <Link 
+          href="/settings" 
+          className="p-2 hover:bg-gray-100 rounded-full"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5" />
+        </Link>
             <Button 
               onClick={handleLogout}
               className="bg-secondary hover:bg-secondary/90 text-white"

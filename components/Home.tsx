@@ -7,6 +7,8 @@ import Image from "next/image"
 import { useStytchUser } from '@stytch/nextjs'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
+import { Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 // Initialize Supabase client with types
 const supabase = createClient<Database>(
@@ -23,9 +25,11 @@ type Request = Database['public']['Tables']['requests']['Row'] & {
 
 export default function Home() {
   const { user } = useStytchUser()
+  const { toast } = useToast()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [requests, setRequests] = useState<Request[]>([])
   const [loading, setLoading] = useState(true)
+  const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export default function Home() {
             source_urls (*),
             request_content (*)
           `)
-          .eq('user_id', user.user_id)
+          .eq('user_id', user.user_id) 
           .order('created_at', { ascending: false })
 
         if (requestsError) throw requestsError
@@ -69,10 +73,81 @@ export default function Home() {
       }
     }
 
+    // Only fetch if we have a user
     if (user?.user_id) {
       fetchData()
     }
   }, [user])
+
+  const handleProcessRequest = async () => {
+    try {
+      setProcessing(true)
+      const latestRequest = requests[0]
+
+      if (!latestRequest) {
+        toast({
+          title: "No URLs to process",
+          description: "Please add some URLs first.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      if (!latestRequest.source_urls.length) {
+        toast({
+          title: "No URLs found",
+          description: "Please add some URLs to process.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const response = await fetch('/api/process-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requestId: latestRequest.id
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to process request')
+      }
+
+      toast({
+        title: "Processing started",
+        description: "Your URLs are being processed. Check back soon!"
+      })
+
+      // Refresh requests to show updated status
+      if (user?.user_id) { // Type guard to ensure user_id exists
+        const { data: updatedRequests, error: requestsError } = await supabase
+          .from('requests')
+          .select(`
+            *,
+            source_urls (*),
+            request_content (*)
+          `)
+          .eq('user_id', user.user_id)
+          .order('created_at', { ascending: false })
+
+        if (requestsError) throw requestsError
+        setRequests(updatedRequests || [])
+      }
+
+    } catch (err) {
+      console.error('Error processing request:', err)
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setProcessing(false)
+    }
+  }
 
   // Get the latest request
   const latestRequest = requests[0]
@@ -127,15 +202,15 @@ export default function Home() {
                 {latestRequest?.source_urls && latestRequest.source_urls.length > 0 ? (
                   latestRequest.source_urls.map((link) => (
                     <div key={link.id}>
-                    <a
-                      href={link.url} // Ensure the link points to the correct URL
-                      target="_blank"   // Opens the link in a new tab
-                      rel="noopener noreferrer" // For security reasons
-                      className="text-primary hover:text-primary-dark underline"
-                    >
-                      {link.url}
-                    </a>
-                  </div>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary-dark underline"
+                      >
+                        {link.url}
+                      </a>
+                    </div>
                   ))
                 ) : (
                   <p className="text-center text-gray-500 py-4">
@@ -144,8 +219,19 @@ export default function Home() {
                 )}
               </div>
             </ScrollArea>
-            <Button className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 rounded-xl text-lg">
-              Bring It to Life ✌️
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 rounded-xl text-lg"
+              onClick={handleProcessRequest}
+              disabled={processing || !latestRequest?.source_urls?.length}
+            >
+              {processing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Bring It to Life ✌️"
+              )}
             </Button>
           </div>
 
