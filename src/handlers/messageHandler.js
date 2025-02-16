@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 import { Url } from '../models/Url';
 import axios from 'axios';
-=======
-const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios');
->>>>>>> Stashed changes
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
@@ -47,13 +42,14 @@ const handleMessage = async (message) => {
 
     if (isValidUrl(messageText)) {
         try {
-            // Store URL in Supabase
+            // Store URL in Supabase using existing source_urls table
             const { data, error } = await supabase
-                .from('urls')
+                .from('source_urls')
                 .insert([
                     {
                         url: messageText,
-                        user_id: userId
+                        // request_id can be null initially as per your schema
+                        created_at: new Date().toISOString()
                     }
                 ])
                 .select()

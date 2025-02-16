@@ -1,20 +1,12 @@
-<<<<<<< Updated upstream
 /* eslint-disable */
 
 import express from 'express';
 import bodyParser from 'body-parser';
-import mongoose from 'mongoose';
 import { config } from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 import { handleMessage } from './handlers/messageHandler';
 
 config();
-=======
-const express = require('express');
-const bodyParser = require('body-parser');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
-const { handleMessage } = require('./handlers/messageHandler');
->>>>>>> Stashed changes
 
 const app = express();
 const port = process.env.PORT || 4000;
