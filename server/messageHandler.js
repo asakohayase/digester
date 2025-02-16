@@ -33,36 +33,88 @@ const isValidUrl = (string) => {
 
 const sendWhatsAppMessage = async (to, message) => {
     try {
-        await axios.post(`https://graph.facebook.com/v17.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
-            messaging_product: "whatsapp",
-            to: to,
-            text: { body: message }
-        }, {
-            headers: {
-                'Authorization': `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
-                'Content-Type': 'application/json'
+        const response = await axios.post(
+            `https://graph.facebook.com/v17.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+            {
+                messaging_product: "whatsapp",
+                to: to,
+                text: { body: message }
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
             }
-        });
+        );
+
+        if (response.status !== 200) {
+            console.error('WhatsApp API error:', response.data);
+            throw new Error(`WhatsApp API returned status ${response.status}`);
+        }
+
+        return response.data;
     } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.error('WhatsApp API error response:', {
+                status: error.response.status,
+                data: error.response.data,
+                headers: error.response.headers
+            });
+        }
+        throw error;
     }
 };
 
+const findUserByWhatsApp = async (whatsappNumber) => {
+    // WhatsApp sends numbers like "919876543210"
+    // Database stores numbers like "+919876543210"
+    // Add "+" prefix if not present
+    const formattedNumber = whatsappNumber.startsWith('+') 
+        ? whatsappNumber 
+        : `+${whatsappNumber}`;
+    
+    console.log('Looking for user with WhatsApp number:', {
+        received: whatsappNumber,
+        formatted: formattedNumber
+    });
+    
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('id, whatsapp_number')
+        .eq('whatsapp_number', formattedNumber)
+        .maybeSingle();
+    
+    if (error) {
+        console.error('Database error:', error);
+        return null;
+    }
+    
+    console.log('Found user:', data);
+    return data;
+};
+
 const handleMessage = async (message) => {
-    const userId = message.from;
+    const whatsappNumber = message.from;
     const messageText = message.text?.body;
 
     if (!messageText) return;
 
     if (isValidUrl(messageText)) {
         try {
-            // Store URL in Supabase
+            // Find user by WhatsApp number
+            const user = await findUserByWhatsApp(whatsappNumber);
+            
+            // Store URL in Supabase with optional user_id
             const { data, error } = await supabase
                 .from('source_urls')
                 .insert([
                     {
                         url: messageText,
-                        created_at: new Date().toISOString()
+                        created_at: new Date().toISOString(),
+                        user_id: user?.id || null  // Link to user if found
                     }
                 ])
                 .select()
@@ -73,21 +125,22 @@ const handleMessage = async (message) => {
                 throw error;
             }
 
-            // Send confirmation to user
-            await sendWhatsAppMessage(
-                userId,
-                "Thanks! I've saved your URL. View it at: https://digester-xi.vercel.app/dashboard"
-            );
+            // Customize message based on user association
+            const message = user 
+                ? "Thanks! I've saved your URL. View it at: https://digester-xi.vercel.app/dashboard"
+                : "Thanks! I've saved your URL. Register at https://digester-xi.vercel.app to view all your saved URLs.";
+
+            await sendWhatsAppMessage(whatsappNumber, message);
         } catch (error) {
             console.error('Error processing URL:', error);
             await sendWhatsAppMessage(
-                userId,
+                whatsappNumber,
                 "Sorry, there was an error processing your URL. Please try again later."
             );
         }
     } else {
         await sendWhatsAppMessage(
-            userId,
+            whatsappNumber,
             "Please send a valid URL to get started!"
         );
     }
