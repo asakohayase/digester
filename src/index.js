@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /* eslint-disable */
 
 import express from 'express';
@@ -7,9 +8,22 @@ import { config } from 'dotenv';
 import { handleMessage } from './handlers/messageHandler';
 
 config();
+=======
+const express = require('express');
+const bodyParser = require('body-parser');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+const { handleMessage } = require('./handlers/messageHandler');
+>>>>>>> Stashed changes
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+// Initialize Supabase client
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+);
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
@@ -85,11 +99,11 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// Then connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+// Then connect to Supabase
+supabase.connect()
     .then(() => {
-        console.log('Connected to MongoDB');
+        console.log('Connected to Supabase');
     })
     .catch((error) => {
-        console.error('MongoDB connection error:', error);
+        console.error('Supabase connection error:', error);
     }); 

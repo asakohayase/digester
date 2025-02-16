@@ -1,5 +1,15 @@
+<<<<<<< Updated upstream
 import { Url } from '../models/Url';
 import axios from 'axios';
+=======
+const { createClient } = require('@supabase/supabase-js');
+const axios = require('axios');
+>>>>>>> Stashed changes
+
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+);
 
 const isValidUrl = (string) => {
     try {
@@ -37,17 +47,25 @@ const handleMessage = async (message) => {
 
     if (isValidUrl(messageText)) {
         try {
-            // Store URL in database
-            const urlDoc = await Url.create({
-                url: messageText,
-                userId: userId
-            });
+            // Store URL in Supabase
+            const { data, error } = await supabase
+                .from('urls')
+                .insert([
+                    {
+                        url: messageText,
+                        user_id: userId
+                    }
+                ])
+                .select()
+                .single();
+
+            if (error) throw error;
 
             // Send webhook to your application
             await axios.post(process.env.APP_WEBHOOK_URL, {
                 url: messageText,
                 userId: userId,
-                urlId: urlDoc._id
+                urlId: data.id
             });
 
             // Send confirmation to user
