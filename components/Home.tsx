@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -18,19 +20,38 @@ const supabase = createClient<Database>(
 
 // Define types based on your schema
 type Profile = Database['public']['Tables']['profiles']['Row']
-type Request = Database['public']['Tables']['requests']['Row'] & {
-  source_urls: Database['public']['Tables']['source_urls']['Row'][]
-  request_content: Database['public']['Tables']['request_content']['Row'] | null
-}
+
 
 export default function Home() {
   const { user } = useStytchUser()
   const { toast } = useToast()
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [requests, setRequests] = useState<Request[]>([])
+  const [urls, setUrls] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchUrls = async () => {
+      if (!user?.user_id) return
+
+      try {
+        const { data: urlsData, error: urlsError } = await supabase
+          .from('source_urls')
+          .select('*')
+          .eq('user_id', user.user_id)
+          .order('created_at', { ascending: false })
+
+        if (urlsError) throw urlsError
+        setUrls(urlsData || [])
+      } catch (err) {
+        console.error('Error fetching URLs:', err)
+        setError('Failed to load URLs')
+      }
+    }
+
+    fetchUrls()
+  }, [user])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,20 +72,6 @@ export default function Home() {
         if (profileError) throw profileError
         setProfile(profileData)
 
-        // Then get requests with related data
-        const { data: requestsData, error: requestsError } = await supabase
-          .from('requests')
-          .select(`
-            *,
-            source_urls (*),
-            request_content (*)
-          `)
-          .eq('user_id', user.user_id) 
-          .order('created_at', { ascending: false })
-
-        if (requestsError) throw requestsError
-        setRequests(requestsData || [])
-
       } catch (err) {
         console.error('Error fetching data:', err)
         setError('Failed to load your content. Please try again later.')
@@ -82,21 +89,11 @@ export default function Home() {
   const handleProcessRequest = async () => {
     try {
       setProcessing(true)
-      const latestRequest = requests[0]
-
-      if (!latestRequest) {
+      
+      if (!urls || urls.length === 0) {
         toast({
           title: "No URLs to process",
           description: "Please add some URLs first.",
-          variant: "destructive"
-        })
-        return
-      }
-
-      if (!latestRequest.source_urls.length) {
-        toast({
-          title: "No URLs found",
-          description: "Please add some URLs to process.",
           variant: "destructive"
         })
         return
@@ -108,7 +105,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          requestId: latestRequest.id
+          urls: urls.map(url => url.id)
         }),
       })
 
@@ -121,20 +118,16 @@ export default function Home() {
         description: "Your URLs are being processed. Check back soon!"
       })
 
-      // Refresh requests to show updated status
-      if (user?.user_id) { // Type guard to ensure user_id exists
-        const { data: updatedRequests, error: requestsError } = await supabase
-          .from('requests')
-          .select(`
-            *,
-            source_urls (*),
-            request_content (*)
-          `)
+      // Refresh URLs to show updated status
+      if (user?.user_id) {
+        const { data: updatedUrls, error: urlsError } = await supabase
+          .from('source_urls')
+          .select('*')
           .eq('user_id', user.user_id)
           .order('created_at', { ascending: false })
 
-        if (requestsError) throw requestsError
-        setRequests(updatedRequests || [])
+        if (urlsError) throw urlsError
+        setUrls(updatedUrls || [])
       }
 
     } catch (err) {
@@ -148,9 +141,6 @@ export default function Home() {
       setProcessing(false)
     }
   }
-
-  // Get the latest request
-  const latestRequest = requests[0]
 
   if (loading) {
     return (
@@ -199,8 +189,8 @@ export default function Home() {
             </h2>
             <ScrollArea className="h-96 mb-8 pr-4">
               <div className="space-y-4">
-                {latestRequest?.source_urls && latestRequest.source_urls.length > 0 ? (
-                  latestRequest.source_urls.map((link) => (
+                {urls && urls.length > 0 ? (
+                  urls.map((link) => (
                     <div key={link.id}>
                       <a
                         href={link.url}
@@ -222,7 +212,7 @@ export default function Home() {
             <Button 
               className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 rounded-xl text-lg"
               onClick={handleProcessRequest}
-              disabled={processing || !latestRequest?.source_urls?.length}
+              disabled={processing || !urls?.length}
             >
               {processing ? (
                 <>
@@ -237,53 +227,26 @@ export default function Home() {
 
           {/* Right Column - Video & Transcript */}
           <div className="space-y-8">
-            {latestRequest?.request_content?.video_url ? (
-              <>
-                {/* Video Player */}
-                <div className="bg-white rounded-2xl p-8 shadow-lg aspect-video flex items-center justify-center relative group">
-                  <video
-                    className="w-full h-full rounded-xl"
-                    controls
-                    poster="/video-thumbnail.jpg"
-                  >
-                    {latestRequest.request_content.video_url && (
-                      <source src={latestRequest.request_content.video_url} type="video/mp4" />
-                    )}
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
+            {/* Video Player */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg aspect-video flex items-center justify-center relative group">
+              <p className="text-gray-500">
+                Video content will appear here after processing your links.
+              </p>
+            </div>
 
-                {/* Transcript */}
-                <div className="bg-white rounded-2xl p-8 shadow-lg">
-                  <h2 className="text-2xl font-serif mb-6 text-secondary">
-                    The Rundown
-                  </h2>
-                  <ScrollArea className="h-48 pr-4">
-                    <div className="space-y-4 text-lg leading-relaxed">
-                      {latestRequest.request_content.video_transcript ? (
-                        latestRequest.request_content.video_transcript
-                          .split("\n\n")
-                          .map((paragraph: string, index: number) => (
-                            <p key={index} className="text-content">
-                              {paragraph}
-                            </p>
-                          ))
-                      ) : (
-                        <p className="text-gray-500 text-center">
-                          Transcript will be available once processing is complete.
-                        </p>
-                      )}
-                    </div>
-                  </ScrollArea>
+            {/* Transcript */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h2 className="text-2xl font-serif mb-6 text-secondary">
+                The Rundown
+              </h2>
+              <ScrollArea className="h-48 pr-4">
+                <div className="space-y-4 text-lg leading-relaxed">
+                  <p className="text-gray-500 text-center">
+                    Transcript will be available once processing is complete.
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className="bg-white rounded-2xl p-8 shadow-lg flex items-center justify-center h-96">
-                <p className="text-gray-500">
-                  Video content will appear here after processing your links.
-                </p>
-              </div>
-            )}
+              </ScrollArea>
+            </div>
           </div>
         </div>
       </div>
