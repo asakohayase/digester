@@ -65,10 +65,7 @@ export default function AuthenticatePage() {
           })
         } else {
           console.error('Unknown error:', error)
-        }
-        
-        // Redirect to login page on error
-        router.push('/login')
+        }    
       }
     }
 
