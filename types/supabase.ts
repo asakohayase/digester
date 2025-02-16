@@ -16,6 +16,7 @@ export type Database = {
           full_name: string | null
           id: string
           updated_at: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           created_at?: string | null
@@ -23,6 +24,7 @@ export type Database = {
           full_name?: string | null
           id: string
           updated_at?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           created_at?: string | null
@@ -30,6 +32,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
@@ -115,36 +118,18 @@ export type Database = {
           id: string
           request_id: string | null
           url: string
-          metadata: {
-            whatsapp_user_id: string
-            message_timestamp: number
-            message_type: string
-            status: 'pending' | 'processed'
-          } | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url: string
-          metadata?: {
-            whatsapp_user_id: string
-            message_timestamp: number
-            message_type: string
-            status: 'pending' | 'processed'
-          } | null
         }
         Update: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url?: string
-          metadata?: {
-            whatsapp_user_id: string
-            message_timestamp: number
-            message_type: string
-            status: 'pending' | 'processed'
-          } | null
         }
         Relationships: [
           {

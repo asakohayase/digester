@@ -56,19 +56,13 @@ const handleMessage = async (message) => {
 
     if (isValidUrl(messageText)) {
         try {
-            // Store URL with metadata in Supabase
+            // Store URL in Supabase
             const { data, error } = await supabase
                 .from('source_urls')
                 .insert([
                     {
                         url: messageText,
-                        created_at: new Date().toISOString(),
-                        metadata: {
-                            whatsapp_user_id: userId,
-                            message_timestamp: message.timestamp || Date.now(),
-                            message_type: message.type || 'text',
-                            status: 'pending'
-                        }
+                        created_at: new Date().toISOString()
                     }
                 ])
                 .select()
@@ -79,7 +73,7 @@ const handleMessage = async (message) => {
                 throw error;
             }
 
-            // Send confirmation to user with the production URL
+            // Send confirmation to user
             await sendWhatsAppMessage(
                 userId,
                 "Thanks! I've saved your URL. View it at: https://digester-xi.vercel.app/dashboard"
