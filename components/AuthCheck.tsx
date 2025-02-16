@@ -22,8 +22,8 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
       },
       buttons: {
         primary: {
-          backgroundColor: "#4A37BE",
-          borderColor: "#4A37BE",
+          backgroundColor: "#4F6F52",
+          borderColor: "#4F6F52",
         },
       },
     }
@@ -73,10 +73,14 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg">
-          <h1 className="text-3xl font-serif mb-6 text-center">Welcome to Briefing</h1>
-          <StytchLogin config={config} styles={styles} />
+      <div className="min-h-screen bg-background">
+        <div className="container max-w-5xl mx-auto px-6 py-12">
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h1 className="text-3xl font-serif mb-6 text-center">Welcome to Briefing</h1>
+              <StytchLogin config={config} styles={styles} />
+            </div>
+          </div>
         </div>
       </div>
     )

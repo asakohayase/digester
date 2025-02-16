@@ -13,8 +13,8 @@ export const LoginOrSignupForm = () => {
     },
     buttons: {
       primary: {
-        backgroundColor: "#4A37BE",
-        borderColor: "#4A37BE",
+        backgroundColor: "#4F6F52",
+        borderColor: "#4F6F52",
       },
     },
   };
