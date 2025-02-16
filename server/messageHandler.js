@@ -1,10 +1,26 @@
-import { Url } from '../models/Url';
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
+// Load environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+config({ path: join(__dirname, '.env') });
+
+// Initialize Supabase client after ensuring environment variables are loaded
+const initSupabase = () => {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+        throw new Error('Supabase credentials are not configured');
+    }
+    return createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_ANON_KEY
+    );
+};
+
+const supabase = initSupabase();
 
 const isValidUrl = (string) => {
     try {
@@ -84,4 +100,4 @@ const handleMessage = async (message) => {
     }
 };
 
-export { handleMessage };
+export { handleMessage }; 

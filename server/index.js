@@ -1,21 +1,18 @@
 /* eslint-disable */
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import { config } from 'dotenv';
-import { createClient } from '@supabase/supabase-js';
-import { handleMessage } from './handlers/messageHandler';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { handleMessage } from './messageHandler.js';
 
-config();
+// Load environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+config({ path: join(__dirname, '.env') });
 
 const app = express();
 const port = process.env.PORT || 4000;
-
-// Initialize Supabase client
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
@@ -86,16 +83,7 @@ app.post('/webhook', async (req, res) => {
     }
 });
 
-// Start server first
+// Start server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-});
-
-// Then connect to Supabase
-supabase.connect()
-    .then(() => {
-        console.log('Connected to Supabase');
-    })
-    .catch((error) => {
-        console.error('Supabase connection error:', error);
-    }); 
+}); 
