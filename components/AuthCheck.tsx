@@ -3,30 +3,20 @@
 import { useStytchUser } from '@stytch/nextjs'
 import { StytchLogin } from '@stytch/nextjs'
 import { Products, OAuthProviders } from '@stytch/vanilla-js'
+import { useStytch } from '@stytch/nextjs'
 
 const REDIRECT_URL = process.env.NEXT_PUBLIC_STYTCH_REDIRECT_URL || 'http://localhost:3000/authenticate'
 
-interface StylesConfig {
-  container: {
-    width: string
-  }
-  buttons: {
-    primary: {
-      backgroundColor: string
-      borderColor: string
-    }
-  }
-}
-
 export function AuthCheck({ children }: { children: React.ReactNode }) {
   const { user, isInitialized } = useStytchUser()
+  const stytch = useStytch()
 
   if (!isInitialized) {
     return null
   }
 
   if (!user) {
-    const styles: StylesConfig = {
+    const styles = {
       container: {
         width: "100%",
       },
@@ -38,6 +28,24 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
       },
     }
     
+    const handleOAuthClick = async (provider: OAuthProviders) => {
+      try {
+        if (provider === OAuthProviders.Google) {
+          await stytch.oauth.google.start({
+            login_redirect_url: REDIRECT_URL,
+            signup_redirect_url: REDIRECT_URL,
+          })
+        } else if (provider === OAuthProviders.Github) {
+          await stytch.oauth.github.start({
+            login_redirect_url: REDIRECT_URL,
+            signup_redirect_url: REDIRECT_URL,
+          })
+        }
+      } catch (error) {
+        console.error('OAuth start error:', error)
+      }
+    }
+
     const config = {
       products: [Products.emailMagicLinks, Products.oauth],
       emailMagicLinksOptions: {
@@ -51,10 +59,12 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
           {
             type: OAuthProviders.Github,
             position: "embedded" as const,
+            onClick: () => handleOAuthClick(OAuthProviders.Github)
           },
           {
             type: OAuthProviders.Google,
             position: "embedded" as const,
+            onClick: () => handleOAuthClick(OAuthProviders.Google)
           }
         ],
         loginRedirectURL: REDIRECT_URL,
