@@ -1,101 +1,114 @@
-import Image from "next/image";
+/* eslint-disable */
+
+"use client"
+
+import { useState } from "react"
+import { LinkIcon, Zap, Play } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [links, setLinks] = useState([
+    "https://example.com/link1",
+    "https://example.com/link2",
+    "https://example.com/link3",
+  ])
+  const [transcript, setTranscript] = useState(
+    `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
+  )
+
+  return (
+    <main className="min-h-screen bg-background text-content">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm">
+        <div className="container max-w-5xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary rounded-full p-2">
+                <Zap className="w-5 h-5 text-background" />
+              </div>
+              <span className="font-serif text-xl">Briefing</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <button className="text-primary hover:text-opacity-80 font-medium">
+                Archives
+              </button>
+              <Button className="bg-secondary hover:bg-secondary/90 text-white">
+                Sign Out
+              </Button>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      </nav>
+
+      <div className="container max-w-5xl mx-auto px-6 py-12">
+        {/* Welcome Section */}
+        <header className="flex items-start gap-6 mb-12">
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="/avatar1.png" 
+            alt="Welcome avatar" 
+            width={64}
+            height={64}
+            className="w-16 h-16 rounded-full"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+          <div>
+            <h1 className="text-3xl font-serif mb-2">Welcome back, Lewis</h1>
+            <p className="text-primary text-lg">Here&apos;s what you missed while you were away</p>
+          </div>
+        </header>
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Links */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg">
+            <h2 className="text-2xl font-serif mb-6 text-secondary">Today&apos;s Links</h2>
+            <ScrollArea className="h-[400px] mb-8 pr-4">
+              <div className="space-y-4">
+                {links.map((link, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-4 bg-background rounded-xl hover:bg-background/80 transition-all duration-200"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-highlight flex items-center justify-center flex-shrink-0">
+                      <LinkIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="flex-1 text-base">{link}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <Button className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-6 rounded-xl text-lg">
+            Bring It to Life ✌️
+            </Button>
+          </div>
+
+          {/* Right Column - Video & Transcript */}
+          <div className="space-y-8">
+            {/* Video Player */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg aspect-video flex items-center justify-center relative group">
+              <div className="absolute inset-0 bg-background/50 rounded-2xl"></div>
+              <button className="relative z-10 w-16 h-16 bg-blue hover:bg-blue/90 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
+                <Play className="w-8 h-8 text-white" fill="white" />
+              </button>
+            </div>
+
+            {/* Transcript */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h2 className="text-2xl font-serif mb-6 text-secondary">The Rundown</h2>
+              <ScrollArea className="h-[200px] pr-4">
+                <div className="space-y-4 text-lg leading-relaxed">
+                  {transcript.split("\n\n").map((paragraph, index) => (
+                    <p key={index} className="text-content">{paragraph}</p>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 }
