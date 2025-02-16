@@ -118,20 +118,30 @@ export type Database = {
           id: string
           request_id: string | null
           url: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url?: string
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "source_urls_request_id_fkey"
             columns: ["request_id"]
