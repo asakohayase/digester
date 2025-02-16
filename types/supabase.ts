@@ -115,18 +115,36 @@ export type Database = {
           id: string
           request_id: string | null
           url: string
+          metadata: {
+            whatsapp_user_id: string
+            message_timestamp: number
+            message_type: string
+            status: 'pending' | 'processed'
+          } | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url: string
+          metadata?: {
+            whatsapp_user_id: string
+            message_timestamp: number
+            message_type: string
+            status: 'pending' | 'processed'
+          } | null
         }
         Update: {
           created_at?: string | null
           id?: string
           request_id?: string | null
           url?: string
+          metadata?: {
+            whatsapp_user_id: string
+            message_timestamp: number
+            message_type: string
+            status: 'pending' | 'processed'
+          } | null
         }
         Relationships: [
           {

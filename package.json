@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "server": "node server/index.js --experimental-modules"
+    "server": "node server/index.js --experimental-modules",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:generate-types": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.3",

@@ -52,38 +52,37 @@ const handleMessage = async (message) => {
     const userId = message.from;
     const messageText = message.text?.body;
 
-    if (!messageText) {
-        return;
-    }
+    if (!messageText) return;
 
     if (isValidUrl(messageText)) {
         try {
-            // Store URL in Supabase using existing source_urls table
+            // Store URL with metadata in Supabase
             const { data, error } = await supabase
                 .from('source_urls')
                 .insert([
                     {
                         url: messageText,
-                        // request_id can be null initially as per your schema
-                        created_at: new Date().toISOString()
+                        created_at: new Date().toISOString(),
+                        metadata: {
+                            whatsapp_user_id: userId,
+                            message_timestamp: message.timestamp || Date.now(),
+                            message_type: message.type || 'text',
+                            status: 'pending'
+                        }
                     }
                 ])
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
 
-            // Send webhook to your application
-            await axios.post(process.env.APP_WEBHOOK_URL, {
-                url: messageText,
-                userId: userId,
-                urlId: data.id
-            });
-
-            // Send confirmation to user
+            // Send confirmation to user with the production URL
             await sendWhatsAppMessage(
                 userId,
-                "Thanks! I've saved your URL. You can check your dashboard to see the summary."
+                "Thanks! I've saved your URL. View it at: https://digester-xi.vercel.app/dashboard"
             );
         } catch (error) {
             console.error('Error processing URL:', error);
