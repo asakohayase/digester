@@ -30,6 +30,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [summary, setSummary] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUrls = async () => {
@@ -98,8 +99,9 @@ export default function Home() {
         })
         return
       }
-
-      const response = await fetch('/api/process-request', {
+  
+      // Call Gemini endpoint first
+      const geminiResponse = await fetch('/api/gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,16 +110,35 @@ export default function Home() {
           urls: urls.map(url => url.id)
         }),
       })
-
+  
+      if (!geminiResponse.ok) {
+        throw new Error('Failed to process with Gemini')
+      }
+  
+      const { summary: newSummary } = await geminiResponse.json()
+      setSummary(newSummary)
+  
+      // Then call your process endpoint
+      const response = await fetch('/api/process-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          urls: urls.map(url => url.id),
+          summary: newSummary
+        }),
+      })
+  
       if (!response.ok) {
         throw new Error('Failed to process request')
       }
-
+  
       toast({
         title: "Processing started",
         description: "Your URLs are being processed. Check back soon!"
       })
-
+  
       // Refresh URLs to show updated status
       if (user?.user_id) {
         const { data: updatedUrls, error: urlsError } = await supabase
@@ -125,11 +146,11 @@ export default function Home() {
           .select('*')
           .eq('user_id', user.user_id)
           .order('created_at', { ascending: false })
-
+  
         if (urlsError) throw urlsError
         setUrls(updatedUrls || [])
       }
-
+  
     } catch (err) {
       console.error('Error processing request:', err)
       toast({
@@ -141,6 +162,7 @@ export default function Home() {
       setProcessing(false)
     }
   }
+
 
   if (loading) {
     return (
@@ -241,9 +263,13 @@ export default function Home() {
               </h2>
               <ScrollArea className="h-48 pr-4">
                 <div className="space-y-4 text-lg leading-relaxed">
-                  <p className="text-gray-500 text-center">
-                    Transcript will be available once processing is complete.
-                  </p>
+                {summary ? (
+                    <p>{summary}</p>
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      Summary will be available once processing is complete.
+                    </p>
+                  )}
                 </div>
               </ScrollArea>
             </div>
