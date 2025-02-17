@@ -77,7 +77,7 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
         <div className="container max-w-5xl mx-auto px-6 py-12">
           <div className="max-w-md mx-auto">
             <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h1 className="text-3xl font-serif mb-6 text-center">Welcome to Briefing</h1>
+              <h1 className="text-3xl font-serif mb-6 text-center">Meet Naomi</h1>
               <StytchLogin config={config} styles={styles} />
             </div>
           </div>

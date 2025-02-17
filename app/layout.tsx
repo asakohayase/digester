@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Briefing - Your Daily News Digest",
+  title: "Naomi - Your Daily News Digest",
   description: "Transform your reading into engaging video content. Stay informed with personalized news briefings and seamless content digestion.",
   keywords: "news briefing, video content, news digest, content transformation",
   openGraph: {

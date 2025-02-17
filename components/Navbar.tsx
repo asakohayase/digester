@@ -33,7 +33,7 @@ export function Navbar() {
             <div className="bg-primary rounded-full p-2">
               <Zap className="w-5 h-5 text-background" />
             </div>
-            <Link className="font-serif text-xl" href="/">Briefing</Link>
+            <Link className="font-serif text-xl" href="/">Naomi</Link>
           </div>
           <div className="flex items-center gap-6">
             <button className="text-primary hover:text-opacity-80 font-medium">
