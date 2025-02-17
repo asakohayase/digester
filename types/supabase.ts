@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       profiles: {
@@ -46,6 +46,9 @@ export type Database = {
           video_summary: string | null
           video_transcript: string | null
           video_url: string | null
+          video_id: string | null
+          video_status: 'processing' | 'completed' | 'failed' | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -56,6 +59,9 @@ export type Database = {
           video_summary?: string | null
           video_transcript?: string | null
           video_url?: string | null
+          video_id?: string | null
+          video_status?: 'processing' | 'completed' | 'failed' | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -66,15 +72,18 @@ export type Database = {
           video_summary?: string | null
           video_transcript?: string | null
           video_url?: string | null
+          video_id?: string | null
+          video_status?: 'processing' | 'completed' | 'failed' | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "request_content_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: true
-            referencedRelation: "requests"
+            foreignKeyName: "request_content_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       requests: {

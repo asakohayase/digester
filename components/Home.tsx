@@ -7,16 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useStytchUser } from '@stytch/nextjs'
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-
-// Initialize Supabase client with types
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import VideoSection from "./VideoSection"
+import { supabase } from '@/lib/supabase-client'
+import { Database } from "@/types/supabase"
 
 // Define types based on your schema
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -87,7 +82,46 @@ export default function Home() {
     }
   }, [user])
 
+  useEffect(() => {
+    const fetchLatestContent = async () => {
+      if (!user?.user_id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('request_content')
+          .select('*')
+          .eq('user_id', user.user_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setSummary(data[0].video_summary || null);
+        }
+      } catch (err) {
+        console.error('Error fetching content:', err);
+        toast({
+          title: "Error fetching summary",
+          description: err instanceof Error ? err.message : "Please try again",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchLatestContent();
+  }, [user]);
+
   const handleProcessRequest = async () => {
+    if (!user?.user_id) {
+      toast({
+        title: "Error",
+        description: "Please sign in to process requests",
+        variant: "destructive",
+      })
+      return;
+    }
+
     try {
       setProcessing(true)
       
@@ -107,15 +141,24 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          urls: urls.map(url => url.id)
+          urls: urls.map(url => url.id),
+          userId: user.user_id
         }),
       })
-  
+
       if (!geminiResponse.ok) {
-        throw new Error('Failed to process with Gemini')
+        const errorData = await geminiResponse.json();
+        console.error('Gemini API error:', errorData);
+        throw new Error(errorData.error || 'Failed to process with Gemini');
       }
-  
-      const { summary: newSummary } = await geminiResponse.json()
+
+      const geminiData = await geminiResponse.json();
+      if (!geminiData.summary) {
+        console.error('No summary in response:', geminiData);
+        throw new Error('No summary generated');
+      }
+
+      const { summary: newSummary } = geminiData
       setSummary(newSummary)
   
       // Then call your process endpoint
@@ -250,11 +293,7 @@ export default function Home() {
           {/* Right Column - Video & Transcript */}
           <div className="space-y-8">
             {/* Video Player */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg aspect-video flex items-center justify-center relative group">
-              <p className="text-gray-500">
-                Video content will appear here after processing your links.
-              </p>
-            </div>
+            <VideoSection />
 
             {/* Transcript */}
             <div className="bg-white rounded-2xl p-8 shadow-lg">
