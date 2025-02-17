@@ -317,7 +317,7 @@ export default function VideoSection() {
 
   return (
     <div className="bg-white rounded-2xl p-8 shadow-lg">
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col gap-3">
         <div className="flex flex-col items-center justify-center w-full h-full">
           {videoUrl ? (
             <video 
